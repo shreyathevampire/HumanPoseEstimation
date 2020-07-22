@@ -12,10 +12,14 @@ from imutils.object_detection import non_max_suppression
 
 
 
-labeldict = {0 : 'adho mukha svanasana',
-				1: 'camatkarasana',
-				2: 'makara adho mukha svanasana',
-				3: 'padmasana'}
+labeldict = {0 : 'cobra pose',
+                1:'crow pose',
+				2: 'dolphin plank pose',
+                3: 'downward facing dog pose',
+				4: 'eagle pose',
+				5: 'flip dog pose',
+                6: 'lotus pose',
+                7 : 'low lunge pose'}
 
 
 # initialize the HOG descriptor/person detector
@@ -27,17 +31,24 @@ def send(imagePath, model, confidenceScore=50):
 
 	image = cv2.imread(imagePath)
 	print("[DEBUG] : image path = ",imagePath)
-	image = imutils.resize(image, width=min(400, image.shape[1]))
+	print("[DEBUG] : Image dimensions -= ",image.shape)
+	# cv2.imshow("original input ",image)
+	# print(image)
+	# cv2.waitKey()
+	image = imutils.resize(image, width=min(600, image.shape[1]))
 	orig = image.copy()
-	cv2.imshow("original input ",image)
+	# image = img_to_array(image)/255.0
+	# image = np.expand_dims(image, axis = 0)
+	# cv2.imshow("resized input ",image)
+	cv2.waitKey()
 	# detect people in the image
 	(rects, weights) = hog.detectMultiScale(image, winStride=(4, 4),padding=(8, 8), scale=1.05)
 
 	# draw the original bounding boxes
 	for (x, y, w, h) in rects:
 		cv2.rectangle(orig, (x, y), (x + w, y + h), (0, 0, 255), 2)
-	cv2.imshow("After NMS", image)
-
+	cv2.imshow("After NMS before face", image)
+	cv2.waitKey()
 	# apply non-maxima suppression to the bounding boxes using a
 	# fairly large overlap threshold to try to maintain overlapping
 	# boxes that are still people
@@ -93,7 +104,7 @@ def main():
 		default="pose_detector",
 		help="path to pose detector model directory")
 	ap.add_argument("-m", "--model", type=str,
-		default="pose_detector.model",
+		default="pose_detector.h5",
 		help="path to trained pose mask detector model")
 	ap.add_argument("-c", "--confidence", type=float, default=0.5,
 		help="minimum probability to filter weak detections")

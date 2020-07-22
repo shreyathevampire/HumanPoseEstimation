@@ -1,4 +1,7 @@
-#importing the necessary packages
+#importing the necessary package
+from __future__ import print_function
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications import MobileNetV2
@@ -24,7 +27,7 @@ import pandas as pd
 ag = argparse.ArgumentParser()
 ag.add_argument("-d","--dataset", required = True, help = "path to input dataset")
 ag.add_argument("-p", "--plot", type=str, default="plot.png", help="path to output loss/accuracy plot")
-ag.add_argument("-m", "--model", type=str, default="pose_detector.model", help="path to output pose detector model")
+ag.add_argument("-m", "--model", type=str, default="pose_detector.h5", help="path to output pose detector model")
 args = vars(ag.parse_args())
 
 
@@ -86,8 +89,8 @@ print(label)
 
 print("[INFO] trainX images shape = ",trainX.shape)
 print("[INFO] trainY images shape = ",trainY.shape)
-print("[INFO] testX images shape = ",testX.shape)
 print("[INFO] testY images shape = ",testY.shape)
+print("[INFO] testX images shape = ",testX.shape)
 
 
 ''' construct the training image generator for data augmentation'''
@@ -100,6 +103,21 @@ aug = ImageDataGenerator(
 	horizontal_flip=True,
 	fill_mode="nearest")
 
+# total = 0
+# toal_img = 10
+# print("[INFO] generating images...")
+# os.mkdir("genimages")
+#
+# image = load_img('/home/ubuntu/Desktop/desktop/summerintern/yoga-poses-dataset/temp_dataset/padmasana/lotus.png')
+# image = img_to_array(image)
+# image = np.expand_dims(image, axis =0)
+# imageGen = aug.flow(image,save_to_dir = 'genimages', save_prefix = "aug", save_format = "png")
+
+# for image in imageGen:
+#     total+= 1
+#
+#     if total == toal_img:
+#         break
 # aug.fit(trainX)
 
 '''during training we will apply data augmentation
@@ -117,7 +135,7 @@ headModel = AveragePooling2D(pool_size=(7, 7))(headModel)
 headModel = Flatten(name="flatten")(headModel)
 headModel = Dense(128, activation="relu")(headModel)
 headModel = Dropout(0.5)(headModel)
-headModel = Dense(4, activation="softmax")(headModel)
+headModel = Dense(8, activation="softmax")(headModel)
 # place the head FC model on top of the base model (this will become
 # the actual model we will train)
 model = Model(inputs=baseModel.input, outputs=headModel)
@@ -155,6 +173,10 @@ print(classification_report(testY.argmax(axis=1), predIdxs,
 	target_names=lb.classes_))
 # serialize the model to disk
 print("[INFO] saving pose detector model...")
+# serialize model to JSON
+# model_json = model.to_json()
+# with open("model.json", "w") as json_file:
+#     json_file.write(model_json)
 model.save(args["model"], save_format="h5")
 
 
